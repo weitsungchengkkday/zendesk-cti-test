@@ -1,0 +1,17 @@
+{
+  "name": "call-test",
+  "author": {
+    "name": "william_cheng",
+    "email": "william.cheng@kkday.com",
+    "url": "https://kkday.zendesk.com"
+  },
+  "defaultLocale": "en",
+  "private": true,
+  "location": {
+      "support": { 
+        "top_bar": "assets/index.html"
+      }
+  },
+  "version": "1.0.0",
+  "frameworkVersion": "2.0"
+}
