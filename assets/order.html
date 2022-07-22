@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" crossorigin="anonymous">
+  <link href="main.css" rel="stylesheet">
+</head>
+<body>
+
+  <div id="content"></div>
+ 
+  <script id="requester-template" type="text/x-handlebars-template">
+
+    <div>
+      <p><b>Order Contact</b></p>
+      <table>
+      <tr>
+        <td>firstname:</td>
+        <td class="data">{{contact_first_name}}</td>
+      </tr>
+      <tr>
+        <td>lastname:</td>
+        <td class="data">{{contact_last_name}}</td>
+      </tr>
+      <tr>
+        <td>email:</td>
+        <td class="data">{{contact_email}}</td>
+      </tr>
+      <tr>
+        <td>telephone country code:</td>
+        <td class="data">{{tel_country_cd}}</td>
+      </tr>
+      <tr>
+        <td>contact telephone:</td>
+        <td class="data">{{contact_tel}}</td>
+      </tr>
+      <tr>
+        <td>contact country:</td>
+        <td class="data">{{contact_country_cd}}</td>
+      </tr>
+      </table>
+    </div>
+
+    <div>
+      <p><b>Order Info</b></p>
+      <table>
+      <tr>
+        <td>member uuid:</td>
+        <td class="data">{{member_uuid}}</td>
+      </tr>
+      <tr>
+        <td>order mid:</td>
+        <td class="data">{{order_mid}}</td>
+      </tr>
+      <tr>
+        <td>order status:</td>
+        <td class="data">{{order_status_txt}}</td>
+      </tr>
+      <tr>
+        <td>order language:</td>
+        <td class="data">{{order_lang_code}}</td>
+      </tr>
+      <tr>
+        <td>order time:</td>
+        <td class="data">{{crt_dt}}</td>
+      </tr>
+      <tr>
+        <td>order currency amount:</td>
+        <td class="data">{{curr_price_total}}</td>
+      </tr>
+      </table>
+    </div>
+
+    <div>
+      <p><b>Product Info</b></p>
+      <table>
+      <tr>
+        <td>product oid:</td>
+        <td class="data">{{product_oid}}</td>
+      </tr>
+      <tr>
+        <td>order lang code:</td>
+        <td class="data">{{order_lang_code}}</td>
+      </tr>
+      <tr>
+        <td>product name master:</td>
+        <td class="data">{{product_name_master}}</td>
+      </tr>
+      <tr>
+        <td>package name master:</td>
+        <td class="data">{{package_name_master}}</td>
+      </tr>
+      <tr>
+        <td>product name user lang:</td>
+        <td class="data">{{product_name_user_lang}}</td>
+      </tr>
+      <tr>
+        <td>package name user lang:</td>
+        <td class="data">{{package_name_user_lang}}</td>
+      </tr>
+      <tr>
+        <td>begin go date:</td>
+        <td class="data">{{beg_lst_go_dt}}</td>
+      </tr>
+      <tr>
+        <td>end go date:</td>
+        <td class="data">{{end_lst_back_dt}}</td>
+      </tr>
+      <tr>
+        <td>guide lang:</td>
+        <td class="data">{{guide_lang}}</td>
+      </tr>
+      </table>
+    </div>
+
+  </script>
+
+  <footer>
+    <a href="https://www.kkday.com" target="_blank">Go KKday</a>
+  </footer>
+
+  <script id="error-template" type="text/x-handlebars-template">
+    <p>{{status}} - {{statusText}} error. Please report a bug at the link below.</p>
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/handlebars@4.3.3/dist/handlebars.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js"></script>
+  <script src="https://static.zdassets.com/zendesk_app_framework_sdk/2.0/zaf_sdk.min.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>

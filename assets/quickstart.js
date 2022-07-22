@@ -24,10 +24,23 @@ $(function () {
     const phoneNumberInput = document.getElementById("phone-number");
     const incomingPhoneNumberEl = document.getElementById("incoming-number");
     const startupButton = document.getElementById("startup-button");
+
+    const startupWorkerButton = document.getElementById("startup-worker");
   
+    // twilio taskrouter worker status
+    const activityIdle = document.getElementById("worker-activity-idle");
+    const activityBusy = document.getElementById("worker-activity-busy");
+    const activityOffline = document.getElementById("worker-activity-offline");
+    const activityReserved = document.getElementById("worker-activity-reserved");
+
     let device;
-    let token;
     let zendesk_user;
+    let worker;
+
+    // {
+    //   worker_id = ""
+    //   worker_activity_id = ""
+    // }
 
     // Zendesk 
 
@@ -42,10 +55,10 @@ $(function () {
 
     // 取得當前的 Zendesk User 
     client.get('currentUser')
-    .then(function (data) {
-      zendesk_user = data['currentUser']
-      console.log(zendesk_user)
-    })
+      .then(function (data) {
+        zendesk_user = data['currentUser']
+      // console.log(zendesk_user)
+      })
 
     // Event Listeners
   
@@ -53,15 +66,31 @@ $(function () {
       e.preventDefault();
       makeOutgoingCall();
     };
+
     getAudioDevicesButton.onclick = getAudioDevices;
     speakerDevices.addEventListener("change", updateOutputDevice);
     ringtoneDevices.addEventListener("change", updateRingtoneDevice);
+
+    
+    activityIdle.addEventListener("click", function(){
+      updateWorkerActivity(activityIdle.value)
+    });
+    activityBusy.addEventListener("click", function(){
+      updateWorkerActivity(activityBusy.value)
+    });
+    activityOffline.addEventListener("click", function(){
+      updateWorkerActivity(activityOffline.value)
+    });
+    activityReserved.addEventListener("click", function(){
+      updateWorkerActivity(activityReserved.value)
+    });
     
   
     // SETUP STEP 1:
     // Browser client should be started after a user gesture
     // to avoid errors in the browser console re: AudioContext
     startupButton.addEventListener("click", startupClient);
+    startupWorkerButton.addEventListener("click", startupWorker)
   
     // SETUP STEP 2: Request an Access Token
     async function startupClient() {
@@ -69,26 +98,29 @@ $(function () {
   
       try {
 
-        let zendesk_user_id 
+        let zendesk_user_email
         if (zendesk_user) {
-            zendesk_user_id = zendesk_user.id
+            zendesk_user_email = zendesk_user.email
+            console.log(zendesk_user.id)
         }
        
-        const data = await $.getJSON(`https://cti-service-zendesk-7936-dev.twil.io/access-token?identity=${zendesk_user_id}`);
+        const data = await $.getJSON(`https://cti-service-zendesk-7936-dev.twil.io/access-token?zendesk_user_email=${zendesk_user_email}`);
         log("Got a token.");
-        token = data.token;
+        let token = data.token;
         log(`TOKEN: ${token}`);
         setClientNameUI(data.identity);
-        intitializeDevice();
+        intitializeDevice(token);
+
       } catch (err) {
         console.log(err);
         log("An error occurred. See your browser console for more information.");
+
       }
     }
   
     // SETUP STEP 3:
     // Instantiate a new Twilio.Device
-    function intitializeDevice() {
+    function intitializeDevice(token) {
       logDiv.classList.remove("hide");
       log("Initializing device");
       device = new Twilio.Device(token, {
@@ -175,6 +207,7 @@ $(function () {
   
     function handleIncomingCall(call) {
       log(`Incoming call from ${call.parameters.From}`);
+      console.log("Call", call)
   
       //show incoming call div and incoming phone number
       incomingCallDiv.classList.remove("hide");
@@ -193,7 +226,7 @@ $(function () {
         hangupIncomingCall(call);
       };
   
-      // add event listener to call object
+      // Add event listener to call object
       call.on("cancel", handleDisconnectedIncomingCall);
       call.on("disconnect", handleDisconnectedIncomingCall);
       call.on("reject", handleDisconnectedIncomingCall);
@@ -330,5 +363,88 @@ $(function () {
         selectEl.appendChild(option);
       });
     }
+
+    async function startupWorker() {
+      
+      log("Requesting worker token")
+      
+      try {
+
+        let zendesk_user_email 
+        if (zendesk_user) {
+            zendesk_user_email = zendesk_user.email
+        }
+       
+        const data = await $.post(`https://cti-service-zendesk-7936-dev.twil.io/taskrouter_worker_token?worker_email=${zendesk_user_email}`);
+        let token = data.token;
+        log(`Worker TOKEN: ${token}`);
+
+        worker = new Twilio.TaskRouter.Worker(token)
+        console.log(worker)
+        log(`Got a worker: ${worker}`);
+        
+        // Add event on worker
+
+        worker.on("ready", function(worker) {
+          console.log("worker.available", worker.available)       // true
+        });
+
+        addWorkerEvent()
+
+      } catch (err) {
+        console.log(err);
+        log("An error occurred. See your browser console for more information.");
+      }
+
+    }
+
+    function addWorkerEvent() {
+
+      worker.on("ready", function(worker) {
+        console.log("worker.sid", worker.sid)             // 'WKxxx'
+        console.log("worker.friendlyName", worker.friendlyName)   // 'Worker 1'
+        console.log("worker.activityName", worker.activityName)   // 'Reserved'
+        console.log("worker.available", worker.available)       // false
+      });
+
+      worker.on("activity.update", function(worker) {
+        console.log("worker.sid", worker.sid)             // 'WKxxx'
+        console.log("worker.friendlyName", worker.friendlyName)   // 'Worker 1'
+        console.log("worker.activityName", worker.activityName)   // 'Reserved'
+        console.log("worker.available", worker.available)       // false
+      });
+    }
+
+    async function updateWorkerActivity(activity) {
+
+      let sid
+  
+      switch (activity) {
+        case "Idle":
+          sid = "WA9ee5618a66402f9aa210711798c75035"
+          break
+        case "Busy":
+          sid = "WA9b169b3805880c2ba14639bdfa781219"
+          break
+        case "Offline":
+          sid = "WAd1ddd200d6a0c9b896b252f299b30dbb"
+          break
+        case "Reserved":
+          sid = "WAc2bb5f0fdaa260f3b36c438001301156"
+          break
+        default: 
+          return
+      }
+      
+      await worker.update("ActivitySid", sid, function(error, worker) {
+        if(error) {
+          console.log(error.code);
+          console.log(error.message);
+        } else {
+          console.log(worker.activityName);
+        }
+      });
+    }
+
   });
   
